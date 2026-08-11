@@ -1,0 +1,13 @@
+{
+  "name": "order-coupon-devops-demo",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test",
+    "lint": "node --check src/coupon.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

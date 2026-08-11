@@ -1,0 +1,87 @@
+name: Start QoderWake Demo
+
+on:
+  workflow_dispatch:
+    inputs:
+      iteration:
+        description: Iteration / Milestone name
+        required: true
+        default: Iteration-Demo
+      requirement:
+        description: Requirement title shown to the customer
+        required: true
+        default: Add BULK25 coupon for large orders
+      test_mode:
+        description: Test path
+        required: true
+        default: fail-once
+        type: choice
+        options:
+          - fail-once
+          - pass
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  create-iteration-and-requirement:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create milestone and requirement
+        id: bootstrap
+        uses: actions/github-script@v7
+        env:
+          ITERATION: ${{ inputs.iteration }}
+          REQUIREMENT: ${{ inputs.requirement }}
+          TEST_MODE: ${{ inputs.test_mode }}
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const title = process.env.ITERATION.trim();
+            const milestones = await github.paginate(github.rest.issues.listMilestones, { owner, repo, state: 'open' });
+            let milestone = milestones.find(item => item.title === title);
+            if (!milestone) {
+              milestone = (await github.rest.issues.createMilestone({ owner, repo, title })).data;
+            }
+            const labels = ['type:requirement', 'status:backlog'];
+            if (process.env.TEST_MODE === 'fail-once') labels.push('demo:test-fail-once');
+            const body = [
+              '## Business requirement',
+              '',
+              process.env.REQUIREMENT,
+              '',
+              'Implement coupon `BULK25`:',
+              '- Available when order amount is at least 1000.',
+              '- Discount is 25% of order amount.',
+              '- Keep existing coupon behavior compatible.',
+              '- Add automated tests and update this issue with delivery evidence.',
+              '',
+              '## Acceptance criteria',
+              '',
+              '- `BULK25` gives no discount below 1000.',
+              '- `BULK25` gives 25% off at and above 1000.',
+              '- `npm test` and `npm run lint` pass.',
+              '',
+              '> Managed by the QoderWake × GitHub DevOps demo.',
+            ].join('\n');
+            const issue = (await github.rest.issues.create({
+              owner, repo, title: process.env.REQUIREMENT, body,
+              milestone: milestone.number, labels,
+            })).data;
+            const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 48) || `iteration-${milestone.number}`;
+            core.setOutput('milestone_number', String(milestone.number));
+            core.setOutput('issue_number', String(issue.number));
+            core.setOutput('iteration_branch', `iteration/${slug}`);
+
+      - name: Wake Release Waker
+        env:
+          QW_API_URL: ${{ secrets.QW_RELEASE_WEBHOOK }}
+          QW_ROLE: release
+          QW_EVENT_TYPE: iteration.created
+          QW_SESSION_ENTITY: milestone:${{ steps.bootstrap.outputs.milestone_number }}
+          QW_CONTEXT_JSON: >-
+            {"milestoneNumber":${{ steps.bootstrap.outputs.milestone_number }},"issueNumber":${{ steps.bootstrap.outputs.issue_number }},"iterationName":${{ toJSON(inputs.iteration) }},"iterationBranch":${{ toJSON(steps.bootstrap.outputs.iteration_branch) }}}
+        run: node .github/scripts/invoke-waker.mjs

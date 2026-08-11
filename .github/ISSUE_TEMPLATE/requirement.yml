@@ -1,0 +1,19 @@
+name: Product requirement
+description: Requirement processed by the Developer Waker after it enters an iteration
+title: "[REQ] "
+labels: ["type:requirement", "status:backlog"]
+body:
+  - type: textarea
+    id: requirement
+    attributes:
+      label: Requirement
+      description: Describe the user value and expected behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: List observable, testable outcomes.
+    validations:
+      required: true

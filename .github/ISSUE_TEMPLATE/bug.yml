@@ -1,0 +1,23 @@
+name: Test bug
+description: Bug raised by the Tester Waker and routed back to Developer
+title: "[BUG] "
+labels: ["type:bug", "status:ready-dev"]
+body:
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual result
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected result
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction and evidence
+    validations:
+      required: true
