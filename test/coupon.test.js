@@ -30,3 +30,8 @@ test('BULK25 gives 25% off above 1000', () => {
   assert.equal(calculateDiscount(2000, 'BULK25'), 500);
   assert.equal(calculatePayable(2000, 'BULK25'), 1500);
 });
+
+test('BULK25 caps discount at 500 for large orders', () => {
+  assert.equal(calculateDiscount(3000, 'BULK25'), 500);
+  assert.equal(calculatePayable(3000, 'BULK25'), 2500);
+});
