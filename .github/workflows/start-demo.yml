@@ -1,4 +1,4 @@
-name: Start EATP Demo
+name: Start QoderWake Demo
 
 on:
   workflow_dispatch:
@@ -8,130 +8,70 @@ on:
         required: true
         default: Iteration-Demo
       requirement:
-        description: Requirement or regression scope
+        description: Requirement title shown to the customer
         required: true
         default: Add BULK25 coupon for large orders
-      mode:
-        description: EATP run mode
+      test_mode:
+        description: Test path
         required: true
-        default: iteration
+        default: fail-once
         type: choice
-        options:
-          - iteration
-          - regression
-      failure_mode:
-        description: Demo injection path; pass means no simulated defect
-        required: true
-        default: code-defect-once
-        type: choice
-        options:
-          - code-defect-once
-          - wait-user-once
-          - pass
+        options: [fail-once, pass]
 
 permissions:
-  contents: read
+  contents: write
   issues: write
 
 jobs:
-  initialize-batch:
+  create-iteration-and-requirement:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Create iteration, batch and requirement
+      - name: Create milestone and requirement
         id: bootstrap
         uses: actions/github-script@v7
         env:
           ITERATION: ${{ inputs.iteration }}
           REQUIREMENT: ${{ inputs.requirement }}
-          MODE: ${{ inputs.mode }}
-          FAILURE_MODE: ${{ inputs.failure_mode }}
+          TEST_MODE: ${{ inputs.test_mode }}
         with:
           script: |
             const { owner, repo } = context.repo;
-            const iteration = process.env.ITERATION.trim();
+            const title = process.env.ITERATION.trim();
             const milestones = await github.paginate(github.rest.issues.listMilestones, { owner, repo, state: 'open' });
-            let milestone = milestones.find(item => item.title === iteration);
-            if (!milestone) {
-              milestone = (await github.rest.issues.createMilestone({ owner, repo, title: iteration })).data;
-            }
-
-            const requirementBody = [
-              '## EATP input',
-              '',
-              `Mode: ${process.env.MODE}`,
-              'Batch: pending',
-              '',
-              '## Business requirement / regression scope',
-              '',
-              process.env.REQUIREMENT,
-              '',
-              'Implement or verify coupon `BULK25`:',
+            let milestone = milestones.find(item => item.title === title);
+            if (!milestone) milestone = (await github.rest.issues.createMilestone({ owner, repo, title })).data;
+            const labels = ['flow:demo', 'type:requirement', 'status:backlog'];
+            if (process.env.TEST_MODE === 'fail-once') labels.push('demo:test-fail-once');
+            const body = [
+              '## Business requirement', '', process.env.REQUIREMENT, '',
+              'Implement coupon `BULK25`:',
               '- Available when order amount is at least 1000.',
               '- Discount is 25% of order amount.',
               '- Keep existing coupon behavior compatible.',
-              '',
-              '## Acceptance criteria',
-              '',
+              '- Add automated tests and update this issue with delivery evidence.', '',
+              '## Acceptance criteria', '',
               '- `BULK25` gives no discount below 1000.',
               '- `BULK25` gives 25% off at and above 1000.',
-              '- `npm test` and `npm run lint` pass.',
+              '- `npm test` and `npm run lint` pass.', '',
+              '> Managed by the QoderWake × GitHub Demo flow.',
             ].join('\n');
-            const requirement = (await github.rest.issues.create({
-              owner, repo,
-              title: process.env.REQUIREMENT,
-              body: requirementBody,
-              milestone: milestone.number,
-              labels: ['type:requirement', 'eatp:L3'],
+            const issue = (await github.rest.issues.create({
+              owner, repo, title: process.env.REQUIREMENT, body,
+              milestone: milestone.number, labels,
             })).data;
-
-            const batchBody = [
-              '## EATP batch_meta',
-              '',
-              `Iteration: ${iteration}`,
-              `Mode: ${process.env.MODE}`,
-              `Failure mode: ${process.env.FAILURE_MODE}`,
-              'Round: 0',
-              `Requirement: #${requirement.number}`,
-              '',
-              '## Assets',
-              '',
-              '- Test cases: repository `test/` (POC prebuilt input)',
-              '- Test scripts: Node.js test suite (POC prebuilt input)',
-              '- Result output: Issue evidence + classified Bug Issues',
-            ].join('\n');
-            const batch = (await github.rest.issues.create({
-              owner, repo,
-              title: `[Batch B${String(milestone.number).padStart(3, '0')}] ${iteration}`,
-              body: batchBody,
-              milestone: milestone.number,
-              labels: [
-                'type:batch',
-                'phase:init',
-                `mode:${process.env.MODE}`,
-                `demo:${process.env.FAILURE_MODE}`,
-              ],
-            })).data;
-
-            await github.rest.issues.update({
-              owner, repo, issue_number: requirement.number,
-              body: requirementBody.replace('Batch: pending', `Batch: #${batch.number}`),
-            });
-
-            const slug = iteration.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 48) || `iteration-${milestone.number}`;
+            const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 48) || `iteration-${milestone.number}`;
             core.setOutput('milestone_number', String(milestone.number));
-            core.setOutput('batch_number', String(batch.number));
-            core.setOutput('requirement_number', String(requirement.number));
+            core.setOutput('issue_number', String(issue.number));
             core.setOutput('iteration_branch', `iteration/${slug}`);
-
-      - name: Wake Orchestrator Waker
+      - name: Wake Demo Release Waker
         env:
-          QW_API_URL: ${{ secrets.QW_ORCHESTRATOR_WEBHOOK }}
+          QW_API_URL: ${{ secrets.QW_DEMO_RELEASE_WEBHOOK }}
           QODER_PAT: ${{ secrets.QODER_PAT }}
-          QW_ROLE: orchestrator
-          QW_EVENT_TYPE: batch.created
-          QW_SESSION_ENTITY: batch:${{ steps.bootstrap.outputs.batch_number }}
+          QW_FLOW: demo
+          QW_ROLE: release
+          QW_EVENT_TYPE: iteration.created
+          QW_SESSION_ENTITY: milestone:${{ steps.bootstrap.outputs.milestone_number }}
           QW_CONTEXT_JSON: >-
-            {"milestoneNumber":${{ steps.bootstrap.outputs.milestone_number }},"batchIssueNumber":${{ steps.bootstrap.outputs.batch_number }},"requirementIssueNumber":${{ steps.bootstrap.outputs.requirement_number }},"mode":${{ toJSON(inputs.mode) }},"iterationName":${{ toJSON(inputs.iteration) }},"iterationBranch":${{ toJSON(steps.bootstrap.outputs.iteration_branch) }}}
+            {"milestoneNumber":${{ steps.bootstrap.outputs.milestone_number }},"issueNumber":${{ steps.bootstrap.outputs.issue_number }},"iterationName":${{ toJSON(inputs.iteration) }},"iterationBranch":${{ toJSON(steps.bootstrap.outputs.iteration_branch) }}}
         run: node .github/scripts/invoke-waker.mjs

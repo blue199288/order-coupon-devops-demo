@@ -4,13 +4,15 @@ const qoderPat = required('QODER_PAT');
 
 const context = parseJson(process.env.QW_CONTEXT_JSON || '{}', 'QW_CONTEXT_JSON');
 const eventType = required('QW_EVENT_TYPE');
+const flow = required('QW_FLOW');
 const role = required('QW_ROLE');
 const repository = required('GITHUB_REPOSITORY');
 const entity = process.env.QW_SESSION_ENTITY || `${eventType}:${process.env.GITHUB_RUN_ID}`;
 const workflowRunId = required('GITHUB_RUN_ID');
 
 const payload = {
-  wakeSessionUniqueId: `github:${repository}:${role}:${eventType}:${entity}:${workflowRunId}`,
+  wakeSessionUniqueId: `github:${repository}:${flow}:${role}:${eventType}:${entity}:${workflowRunId}`,
+  flow,
   eventType,
   role,
   repository,
