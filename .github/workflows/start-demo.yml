@@ -20,7 +20,7 @@ on:
           - iteration
           - regression
       failure_mode:
-        description: Demo result path
+        description: Demo injection path; pass means no simulated defect
         required: true
         default: code-defect-once
         type: choice
