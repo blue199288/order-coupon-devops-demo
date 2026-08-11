@@ -1,5 +1,6 @@
 const apiUrl = process.env.QW_API_URL;
 if (!apiUrl) throw new Error('Required QoderWake API secret is missing');
+const qoderPat = required('QODER_PAT');
 
 const context = parseJson(process.env.QW_CONTEXT_JSON || '{}', 'QW_CONTEXT_JSON');
 const eventType = required('QW_EVENT_TYPE');
@@ -19,13 +20,19 @@ const payload = {
 
 const response = await fetch(apiUrl, {
   method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
+  headers: {
+    Authorization: `Bearer ${qoderPat}`,
+    'Content-Type': 'application/json',
+  },
   body: JSON.stringify(payload),
 });
 
 const responseText = await response.text();
 if (!response.ok) {
-  throw new Error(`QoderWake rejected ${role} event: HTTP ${response.status} ${responseText.slice(0, 240)}`);
+  const hint = response.status === 401 || response.status === 403
+    ? 'Check the QODER_PAT GitHub Secret and its validity.'
+    : 'Check the Waker API URL and QoderWake run history.';
+  throw new Error(`QoderWake rejected ${role} event: HTTP ${response.status}. ${hint}`);
 }
 
 let result = {};

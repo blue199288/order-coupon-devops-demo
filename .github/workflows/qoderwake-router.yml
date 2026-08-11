@@ -27,6 +27,7 @@ jobs:
       - name: Wake Developer Waker
         env:
           QW_API_URL: ${{ secrets.QW_DEVELOPER_WEBHOOK }}
+          QODER_PAT: ${{ secrets.QODER_PAT }}
           QW_ROLE: developer
           QW_EVENT_TYPE: issue.ready-for-development
           QW_SESSION_ENTITY: issue:${{ github.event.issue.number }}
@@ -45,6 +46,7 @@ jobs:
       - name: Wake Reviewer Waker
         env:
           QW_API_URL: ${{ secrets.QW_REVIEWER_WEBHOOK }}
+          QODER_PAT: ${{ secrets.QODER_PAT }}
           QW_ROLE: reviewer
           QW_EVENT_TYPE: pull-request.content-revision
           QW_SESSION_ENTITY: pr:${{ github.event.pull_request.number }}
@@ -64,6 +66,7 @@ jobs:
       - name: Wake Tester Waker
         env:
           QW_API_URL: ${{ secrets.QW_TESTER_WEBHOOK }}
+          QODER_PAT: ${{ secrets.QODER_PAT }}
           QW_ROLE: tester
           QW_EVENT_TYPE: pull-request.merged-to-iteration
           QW_SESSION_ENTITY: pr:${{ github.event.pull_request.number }}
@@ -84,6 +87,7 @@ jobs:
       - name: Wake Release Waker after main merge
         env:
           QW_API_URL: ${{ secrets.QW_RELEASE_WEBHOOK }}
+          QODER_PAT: ${{ secrets.QODER_PAT }}
           QW_ROLE: release
           QW_EVENT_TYPE: iteration.merged-to-main
           QW_SESSION_ENTITY: pr:${{ github.event.pull_request.number }}

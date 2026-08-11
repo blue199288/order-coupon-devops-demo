@@ -79,6 +79,7 @@ jobs:
       - name: Wake Release Waker
         env:
           QW_API_URL: ${{ secrets.QW_RELEASE_WEBHOOK }}
+          QODER_PAT: ${{ secrets.QODER_PAT }}
           QW_ROLE: release
           QW_EVENT_TYPE: iteration.created
           QW_SESSION_ENTITY: milestone:${{ steps.bootstrap.outputs.milestone_number }}
