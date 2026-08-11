@@ -19,6 +19,7 @@ test('negative amount is rejected', () => {
 test('BULK25 gives no discount below 1000', () => {
   assert.equal(calculateDiscount(999, 'BULK25'), 0);
   assert.equal(calculatePayable(999, 'BULK25'), 999);
+  assert.equal(calculatePayable(500, 'BULK25'), 500);
 });
 
 test('BULK25 gives 25% off at 1000', () => {
@@ -29,4 +30,6 @@ test('BULK25 gives 25% off at 1000', () => {
 test('BULK25 gives 25% off above 1000', () => {
   assert.equal(calculateDiscount(2000, 'BULK25'), 500);
   assert.equal(calculatePayable(2000, 'BULK25'), 1500);
+  assert.equal(calculateDiscount(1500, 'BULK25'), 375);
+  assert.equal(calculatePayable(1500, 'BULK25'), 1125);
 });
