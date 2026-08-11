@@ -2,6 +2,8 @@
 
 本仓库由 QoderWake 一键向导维护，默认用于演示一条容易观察的 AI DevOps 闭环，同时保留真实用户 EATP 流程。
 
+配套架构图和逐步操作见 [Demo 流程演示说明](docs/demo-flow-guide.md)。
+
 ## 推荐演示链路
 
 1. `Start QoderWake Demo` 创建 Milestone 和 `flow:demo` Requirement。
