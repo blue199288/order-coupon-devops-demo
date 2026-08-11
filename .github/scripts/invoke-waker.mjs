@@ -7,14 +7,15 @@ const eventType = required('QW_EVENT_TYPE');
 const role = required('QW_ROLE');
 const repository = required('GITHUB_REPOSITORY');
 const entity = process.env.QW_SESSION_ENTITY || `${eventType}:${process.env.GITHUB_RUN_ID}`;
+const workflowRunId = required('GITHUB_RUN_ID');
 
 const payload = {
-  wakeSessionUniqueId: `github:${repository}:${role}:${entity}`,
+  wakeSessionUniqueId: `github:${repository}:${role}:${eventType}:${entity}:${workflowRunId}`,
   eventType,
   role,
   repository,
-  runId: process.env.GITHUB_RUN_ID,
-  deliveryId: `${process.env.GITHUB_RUN_ID}:${process.env.GITHUB_RUN_ATTEMPT || '1'}:${role}`,
+  runId: workflowRunId,
+  deliveryId: `${workflowRunId}:${process.env.GITHUB_RUN_ATTEMPT || '1'}:${role}`,
   context,
 };
 
