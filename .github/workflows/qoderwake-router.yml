@@ -57,14 +57,16 @@ jobs:
     if: >-
       github.event_name == 'issues' &&
       !contains(github.event.issue.labels.*.name, 'type:batch') &&
-      ((github.event.action == 'opened' &&
-        (contains(github.event.issue.labels.*.name, 'eatp:L0') ||
-         contains(github.event.issue.labels.*.name, 'eatp:L1') ||
-         contains(github.event.issue.labels.*.name, 'eatp:L2'))) ||
-       (github.event.action == 'labeled' &&
-        (github.event.label.name == 'eatp:L0' ||
-         github.event.label.name == 'eatp:L1' ||
-         github.event.label.name == 'eatp:L2')))
+      (((contains(github.event.issue.labels.*.name, 'type:bug')) &&
+        ((github.event.action == 'opened' &&
+          (contains(github.event.issue.labels.*.name, 'eatp:L0') ||
+           contains(github.event.issue.labels.*.name, 'eatp:L1'))) ||
+         (github.event.action == 'labeled' &&
+          (github.event.label.name == 'eatp:L0' ||
+           github.event.label.name == 'eatp:L1')))) ||
+       ((contains(github.event.issue.labels.*.name, 'type:requirement')) &&
+        github.event.action == 'labeled' &&
+        github.event.label.name == 'eatp:L2')))
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -76,7 +78,7 @@ jobs:
           QW_EVENT_TYPE: item.state-changed
           QW_SESSION_ENTITY: item:${{ github.event.issue.number }}
           QW_CONTEXT_JSON: >-
-            {"itemIssueNumber":${{ github.event.issue.number }},"itemUrl":${{ toJSON(github.event.issue.html_url) }},"label":${{ toJSON(github.event.label.name || '') }}}
+            {"itemIssueNumber":${{ github.event.issue.number }},"itemUrl":${{ toJSON(github.event.issue.html_url) }},"action":${{ toJSON(github.event.action) }},"label":${{ toJSON(github.event.label.name) }}}
         run: node .github/scripts/invoke-waker.mjs
 
   orchestrator-user-decision:
