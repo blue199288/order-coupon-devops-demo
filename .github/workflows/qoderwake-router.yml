@@ -1,10 +1,10 @@
-name: QoderWake Event Router
+name: EATP Event Router
 
 on:
   issues:
-    types: [opened, labeled, milestoned, reopened]
+    types: [opened, labeled, reopened]
   pull_request:
-    types: [opened, reopened, synchronize, ready_for_review, closed]
+    types: [closed]
 
 permissions:
   contents: read
@@ -16,11 +16,9 @@ jobs:
   developer:
     if: >-
       github.event_name == 'issues' &&
-      github.event.issue.milestone != null &&
-      contains(github.event.issue.labels.*.name, 'status:ready-dev') &&
-      (github.event.action == 'opened' || github.event.action == 'reopened' ||
-       (github.event.action == 'labeled' && github.event.label.name == 'status:ready-dev') ||
-       github.event.action == 'milestoned')
+      github.event.action == 'labeled' &&
+      github.event.label.name == 'phase:dev' &&
+      contains(github.event.issue.labels.*.name, 'type:batch')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -29,37 +27,18 @@ jobs:
           QW_API_URL: ${{ secrets.QW_DEVELOPER_WEBHOOK }}
           QODER_PAT: ${{ secrets.QODER_PAT }}
           QW_ROLE: developer
-          QW_EVENT_TYPE: issue.ready-for-development
-          QW_SESSION_ENTITY: issue:${{ github.event.issue.number }}
+          QW_EVENT_TYPE: batch.phase-dev
+          QW_SESSION_ENTITY: batch:${{ github.event.issue.number }}
           QW_CONTEXT_JSON: >-
-            {"issueNumber":${{ github.event.issue.number }},"issueUrl":${{ toJSON(github.event.issue.html_url) }},"milestoneNumber":${{ github.event.issue.milestone.number }},"milestoneTitle":${{ toJSON(github.event.issue.milestone.title) }},"action":${{ toJSON(github.event.action) }}}
-        run: node .github/scripts/invoke-waker.mjs
-
-  reviewer:
-    if: >-
-      github.event_name == 'pull_request' &&
-      github.event.action != 'closed' &&
-      github.event.pull_request.draft == false
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Wake Reviewer Waker
-        env:
-          QW_API_URL: ${{ secrets.QW_REVIEWER_WEBHOOK }}
-          QODER_PAT: ${{ secrets.QODER_PAT }}
-          QW_ROLE: reviewer
-          QW_EVENT_TYPE: pull-request.content-revision
-          QW_SESSION_ENTITY: pr:${{ github.event.pull_request.number }}
-          QW_CONTEXT_JSON: >-
-            {"pullNumber":${{ github.event.pull_request.number }},"pullUrl":${{ toJSON(github.event.pull_request.html_url) }},"action":${{ toJSON(github.event.action) }},"headSha":${{ toJSON(github.event.pull_request.head.sha) }},"headRef":${{ toJSON(github.event.pull_request.head.ref) }},"baseRef":${{ toJSON(github.event.pull_request.base.ref) }}}
+            {"batchIssueNumber":${{ github.event.issue.number }},"issueUrl":${{ toJSON(github.event.issue.html_url) }},"milestoneNumber":${{ github.event.issue.milestone.number }}}
         run: node .github/scripts/invoke-waker.mjs
 
   tester:
     if: >-
-      github.event_name == 'pull_request' &&
-      github.event.action == 'closed' &&
-      github.event.pull_request.merged == true &&
-      startsWith(github.event.pull_request.base.ref, 'iteration/')
+      github.event_name == 'issues' &&
+      github.event.action == 'labeled' &&
+      github.event.label.name == 'phase:test' &&
+      contains(github.event.issue.labels.*.name, 'type:batch')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -68,29 +47,75 @@ jobs:
           QW_API_URL: ${{ secrets.QW_TESTER_WEBHOOK }}
           QODER_PAT: ${{ secrets.QODER_PAT }}
           QW_ROLE: tester
-          QW_EVENT_TYPE: pull-request.merged-to-iteration
-          QW_SESSION_ENTITY: pr:${{ github.event.pull_request.number }}
+          QW_EVENT_TYPE: batch.phase-test
+          QW_SESSION_ENTITY: batch:${{ github.event.issue.number }}
           QW_CONTEXT_JSON: >-
-            {"pullNumber":${{ github.event.pull_request.number }},"pullUrl":${{ toJSON(github.event.pull_request.html_url) }},"mergeSha":${{ toJSON(github.event.pull_request.merge_commit_sha) }},"headRef":${{ toJSON(github.event.pull_request.head.ref) }},"iterationBranch":${{ toJSON(github.event.pull_request.base.ref) }}}
+            {"batchIssueNumber":${{ github.event.issue.number }},"issueUrl":${{ toJSON(github.event.issue.html_url) }},"milestoneNumber":${{ github.event.issue.milestone.number }}}
         run: node .github/scripts/invoke-waker.mjs
 
-  release-finalize:
+  orchestrator-item-state:
+    if: >-
+      github.event_name == 'issues' &&
+      !contains(github.event.issue.labels.*.name, 'type:batch') &&
+      ((github.event.action == 'opened' &&
+        (contains(github.event.issue.labels.*.name, 'eatp:L0') ||
+         contains(github.event.issue.labels.*.name, 'eatp:L1') ||
+         contains(github.event.issue.labels.*.name, 'eatp:L2'))) ||
+       (github.event.action == 'labeled' &&
+        (github.event.label.name == 'eatp:L0' ||
+         github.event.label.name == 'eatp:L1' ||
+         github.event.label.name == 'eatp:L2')))
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Wake Orchestrator Waker for item state
+        env:
+          QW_API_URL: ${{ secrets.QW_ORCHESTRATOR_WEBHOOK }}
+          QODER_PAT: ${{ secrets.QODER_PAT }}
+          QW_ROLE: orchestrator
+          QW_EVENT_TYPE: item.state-changed
+          QW_SESSION_ENTITY: item:${{ github.event.issue.number }}
+          QW_CONTEXT_JSON: >-
+            {"itemIssueNumber":${{ github.event.issue.number }},"itemUrl":${{ toJSON(github.event.issue.html_url) }},"label":${{ toJSON(github.event.label.name || '') }}}
+        run: node .github/scripts/invoke-waker.mjs
+
+  orchestrator-user-decision:
+    if: >-
+      github.event_name == 'issues' &&
+      github.event.action == 'labeled' &&
+      (github.event.label.name == 'decision:pass' ||
+       github.event.label.name == 'decision:reject' ||
+       github.event.label.name == 'decision:remove')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Wake Orchestrator Waker for user decision
+        env:
+          QW_API_URL: ${{ secrets.QW_ORCHESTRATOR_WEBHOOK }}
+          QODER_PAT: ${{ secrets.QODER_PAT }}
+          QW_ROLE: orchestrator
+          QW_EVENT_TYPE: user.decision
+          QW_SESSION_ENTITY: item:${{ github.event.issue.number }}
+          QW_CONTEXT_JSON: >-
+            {"itemIssueNumber":${{ github.event.issue.number }},"itemUrl":${{ toJSON(github.event.issue.html_url) }},"decision":${{ toJSON(github.event.label.name) }}}
+        run: node .github/scripts/invoke-waker.mjs
+
+  orchestrator-dev-merged:
     if: >-
       github.event_name == 'pull_request' &&
       github.event.action == 'closed' &&
       github.event.pull_request.merged == true &&
-      github.event.pull_request.base.ref == 'main' &&
-      startsWith(github.event.pull_request.head.ref, 'iteration/')
+      startsWith(github.event.pull_request.base.ref, 'iteration/')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Wake Release Waker after main merge
+      - name: Wake Orchestrator Waker after deployment merge
         env:
-          QW_API_URL: ${{ secrets.QW_RELEASE_WEBHOOK }}
+          QW_API_URL: ${{ secrets.QW_ORCHESTRATOR_WEBHOOK }}
           QODER_PAT: ${{ secrets.QODER_PAT }}
-          QW_ROLE: release
-          QW_EVENT_TYPE: iteration.merged-to-main
+          QW_ROLE: orchestrator
+          QW_EVENT_TYPE: dev.merged
           QW_SESSION_ENTITY: pr:${{ github.event.pull_request.number }}
           QW_CONTEXT_JSON: >-
-            {"pullNumber":${{ github.event.pull_request.number }},"mergeSha":${{ toJSON(github.event.pull_request.merge_commit_sha) }},"iterationBranch":${{ toJSON(github.event.pull_request.head.ref) }}}
+            {"pullNumber":${{ github.event.pull_request.number }},"pullUrl":${{ toJSON(github.event.pull_request.html_url) }},"mergeSha":${{ toJSON(github.event.pull_request.merge_commit_sha) }},"iterationBranch":${{ toJSON(github.event.pull_request.base.ref) }}}
         run: node .github/scripts/invoke-waker.mjs
