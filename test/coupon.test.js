@@ -54,3 +54,12 @@ test('Issue #12: BULK25 acceptance criteria', () => {
   assert.equal(calculateDiscount(5000, 'BULK25'), 1250);
   assert.equal(calculatePayable(5000, 'BULK25'), 3750);
 });
+
+test('Issue #17: BULK25 acceptance criteria', () => {
+  assert.equal(calculateDiscount(100, 'BULK25'), 0);
+  assert.equal(calculatePayable(100, 'BULK25'), 100);
+  assert.equal(calculateDiscount(1000, 'BULK25'), 250);
+  assert.equal(calculatePayable(1000, 'BULK25'), 750);
+  assert.equal(calculateDiscount(4000, 'BULK25'), 1000);
+  assert.equal(calculatePayable(4000, 'BULK25'), 3000);
+});
