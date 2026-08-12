@@ -61,7 +61,7 @@ flowchart LR
 
 ### Developer Waker：从需求事实出发完成工程交付
 
-Developer Waker 被“需求进入待开发”或“Bug 回流”事件唤醒。它重新读取需求、验收标准、评论和现有 PR，从 iteration 分支创建 `demo/feature/*` 或 `demo/bugfix/*`，补充测试、完成最小实现，并运行 `npm test` 与 `npm run lint`。
+Developer Waker 被“需求进入待开发”或“Bug 回流”事件唤醒。它重新读取需求、验收标准、评论和现有 PR，从 iteration 分支创建推荐命名的 `demo/feature/*` 或 `demo/bugfix/*`，补充测试、完成最小实现，并运行 `npm test` 与 `npm run lint`。事件路由与监控以 PR body 的 `Flow: demo` 和 `[QW-DEMO][DEV][READY]` 为权威识别条件，因此不会因模型使用兼容的 `feature/*` 命名而中断。
 
 开发完成后，它创建或更新代码 PR，把测试证据、关联 Issue 和交付 marker 一起写入 PR，而不是只在对话窗口里声称“已经完成”。
 
@@ -171,17 +171,6 @@ PAT 和 API 地址只存储在 GitHub Actions Secrets。启动器负责隐藏输
 ---
 
 ## 一键 Demo：客户实际会看到什么
-
-### 获取并运行演示程序
-
-[GitHub Release v3.0.0](https://github.com/blue199288/order-coupon-devops-demo/releases/tag/qw-github-demo-v3.0.0) 提供 Apple Silicon 的 `QoderWake-GitHub-Demo-macOS-arm64.zip`、Intel Mac 的 `QoderWake-GitHub-Demo-macOS-x64.zip` 和 `SHA256SUMS`。运行 `uname -m` 判断架构，下载后执行 `shasum -a 256 -c SHA256SUMS`；只有结果为 `OK` 才解压运行。
-
-首次运行可能被 macOS Gatekeeper 或企业终端安全软件拦截。确认文件来自正式渠道且 SHA256 校验通过后，可在“系统设置 → 隐私与安全性”中选择“仍要打开”；企业设备应把文件用途和 SHA256 提交 IT/安全管理员，只申请放行该文件。不要关闭 Gatekeeper、杀毒软件或企业安全策略。参考 [Apple 官方说明](https://support.apple.com/en-asia/guide/mac-help/-mh40616/mac)。
-
-```bash
-chmod +x ./qw-github-demo-darwin-arm64
-./qw-github-demo-darwin-arm64 launch
-```
 
 运行：
 
