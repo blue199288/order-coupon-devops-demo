@@ -258,3 +258,11 @@ test('Issue #57: BULK25 acceptance criteria', () => {
   assert.equal(calculateDiscount(100, 'SAVE10'), 10);
   assert.equal(calculatePayable(100, 'SAVE10'), 90);
 });
+
+test('Issue #59: calculatePayable rejects invalid orderAmount (negative, NaN, Infinity)', () => {
+  // Regression coverage for demo:test-fail-once injected gap (Bug #59, Parent #57).
+  assert.throws(() => calculatePayable(-1, 'BULK25'), /orderAmount must be a non-negative number/);
+  assert.throws(() => calculatePayable(NaN, 'BULK25'), /orderAmount must be a non-negative number/);
+  assert.throws(() => calculatePayable(Infinity, 'BULK25'), /orderAmount must be a non-negative number/);
+  assert.throws(() => calculatePayable(-0.01, 'SAVE10'), /orderAmount must be a non-negative number/);
+});
