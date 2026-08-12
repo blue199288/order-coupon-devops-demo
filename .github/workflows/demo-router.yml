@@ -55,7 +55,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: main
+          ref: ${{ github.workflow_sha }}
       - name: Resolve Demo pull request
         id: pull
         env:
