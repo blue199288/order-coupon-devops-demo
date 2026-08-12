@@ -45,9 +45,13 @@ jobs:
           script: |
             const { owner, repo } = context.repo;
             const iteration = process.env.ITERATION.trim();
-            const milestones = await github.paginate(github.rest.issues.listMilestones, { owner, repo, state: 'open' });
-            let milestone = milestones.find(item => item.title === iteration);
-            if (!milestone) milestone = (await github.rest.issues.createMilestone({ owner, repo, title: iteration })).data;
+            const milestones = await github.paginate(github.rest.issues.listMilestones, { owner, repo, state: 'all' });
+            const duplicate = milestones.find(item => item.title === iteration);
+            if (duplicate) {
+              core.setFailed(`Iteration name already exists: ${iteration}. Start a new run with a unique suffix.`);
+              return;
+            }
+            const milestone = (await github.rest.issues.createMilestone({ owner, repo, title: iteration })).data;
 
             const requirementBody = [
               '## EATP input', '', `Mode: ${process.env.MODE}`, 'Batch: pending', '',
