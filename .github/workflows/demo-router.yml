@@ -75,6 +75,23 @@ jobs:
             echo "The selected pull request is not a ready Demo delivery" >&2
             exit 1
           fi
+      - name: Verify pull request targets its Issue iteration
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PULL_NUMBER: ${{ steps.pull.outputs.number }}
+          ACTUAL_BASE: ${{ steps.pull.outputs.base_ref }}
+        run: |
+          issue_number="$(jq -r '(.body // "") | capture("(?m)^(Issue:|Resolves)[[:space:]]*#(?<number>[0-9]+)[[:space:]]*$").number // empty' "$RUNNER_TEMP/demo-pr.json")"
+          if [ -z "$issue_number" ]; then echo "Demo PR has no Issue reference" >&2; exit 1; fi
+          issue_json="$(gh api "repos/${GITHUB_REPOSITORY}/issues/${issue_number}")"
+          milestone_number="$(jq -r '.milestone.number // empty' <<<"$issue_json")"
+          if [ -z "$milestone_number" ]; then echo "Linked Issue has no Milestone" >&2; exit 1; fi
+          comments_json="$(gh api "repos/${GITHUB_REPOSITORY}/issues/${issue_number}/comments?per_page=100")"
+          expected_base="$(jq -r --arg marker "[QW-DEMO][RELEASE][milestone:${milestone_number}][BRANCH_READY] " '[.[].body | select(contains($marker)) | split($marker)[1] | split("\n")[0]][-1] // empty' <<<"$comments_json")"
+          if [ -z "$expected_base" ] || [ "$ACTUAL_BASE" != "$expected_base" ]; then
+            echo "Demo PR targets wrong iteration: actual=$ACTUAL_BASE expected=$expected_base" >&2
+            exit 1
+          fi
       - name: Wake Demo Reviewer Waker
         env:
           QW_API_URL: ${{ secrets.QW_DEMO_REVIEWER_WEBHOOK }}
