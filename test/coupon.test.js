@@ -123,3 +123,31 @@ test('Issue #34: BULK25 acceptance criteria', () => {
   assert.equal(calculateDiscount(200, 'SAVE10'), 20);
   assert.equal(calculatePayable(200, 'SAVE10'), 180);
 });
+
+test('Issue #37: BULK25 acceptance criteria', () => {
+  // BULK25 gives no discount below 1000
+  assert.equal(calculateDiscount(0, 'BULK25'), 0);
+  assert.equal(calculateDiscount(999.99, 'BULK25'), 0);
+  assert.equal(calculatePayable(999.99, 'BULK25'), 999.99);
+  // BULK25 gives 25% off at and above 1000
+  assert.equal(calculateDiscount(1000, 'BULK25'), 250);
+  assert.equal(calculatePayable(1000, 'BULK25'), 750);
+  assert.equal(calculateDiscount(1500, 'BULK25'), 375);
+  assert.equal(calculatePayable(1500, 'BULK25'), 1125);
+  // Existing coupon behavior preserved
+  assert.equal(calculateDiscount(200, 'SAVE10'), 20);
+  assert.equal(calculatePayable(200, 'SAVE10'), 180);
+});
+
+test('Issue #39: BULK25 floating-point boundary regression (Issue #37)', () => {
+  // 1000 - Number.EPSILON === 1000 in IEEE 754; use relative epsilon for actual boundary
+  const justBelow = 1000 * (1 - Number.EPSILON); // 999.9999999999998, truly < 1000
+  const justAbove = 1000 * (1 + Number.EPSILON); // 1000.0000000000002, truly > 1000
+  // just below threshold: no discount
+  assert.equal(calculateDiscount(justBelow, 'BULK25'), 0);
+  assert.equal(calculatePayable(justBelow, 'BULK25'), Math.round(justBelow * 100) / 100);
+  // just above threshold: 25% discount applies
+  const expectedDiscount = Math.round(justAbove * 25) / 100;
+  assert.equal(calculateDiscount(justAbove, 'BULK25'), expectedDiscount);
+  assert.equal(calculatePayable(justAbove, 'BULK25'), Math.round((justAbove - expectedDiscount) * 100) / 100);
+});
