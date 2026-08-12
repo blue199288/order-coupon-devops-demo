@@ -26,8 +26,7 @@ jobs:
       contains(github.event.issue.labels.*.name, 'flow:demo') &&
       contains(github.event.issue.labels.*.name, 'status:ready-dev') &&
       github.event.action == 'labeled' &&
-      (github.event.label.name == 'status:ready-dev' ||
-       github.event.label.name == 'flow:demo')
+      github.event.label.name == 'status:ready-dev'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
