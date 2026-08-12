@@ -72,3 +72,35 @@ test('Issue #19: BULK25 fractional cents use round-half-up not truncation', () =
   assert.equal(calculateDiscount(1001, 'BULK25'), 250.25);
   assert.equal(calculatePayable(1001, 'BULK25'), 750.75);
 });
+
+test('Issue #24: BULK25 acceptance criteria', () => {
+  // No discount below 1000
+  assert.equal(calculateDiscount(0, 'BULK25'), 0);
+  assert.equal(calculateDiscount(999, 'BULK25'), 0);
+  assert.equal(calculatePayable(999, 'BULK25'), 999);
+  // 25% off at exactly 1000
+  assert.equal(calculateDiscount(1000, 'BULK25'), 250);
+  assert.equal(calculatePayable(1000, 'BULK25'), 750);
+  // 25% off above 1000
+  assert.equal(calculateDiscount(2000, 'BULK25'), 500);
+  assert.equal(calculatePayable(2000, 'BULK25'), 1500);
+  // Existing coupon behavior preserved
+  assert.equal(calculateDiscount(200, 'SAVE10'), 20);
+  assert.equal(calculatePayable(200, 'SAVE10'), 180);
+});
+
+test('Issue #26: BULK25 no real defect after repair loop', () => {
+  // Protocol-required bug (demo:test-fail-once); verify no real defect exists.
+  // BULK25 gives no discount below 1000
+  assert.equal(calculateDiscount(500, 'BULK25'), 0);
+  assert.equal(calculatePayable(500, 'BULK25'), 500);
+  // BULK25 gives 25% off at threshold
+  assert.equal(calculateDiscount(1000, 'BULK25'), 250);
+  assert.equal(calculatePayable(1000, 'BULK25'), 750);
+  // BULK25 gives 25% off above 1000
+  assert.equal(calculateDiscount(5000, 'BULK25'), 1250);
+  assert.equal(calculatePayable(5000, 'BULK25'), 3750);
+  // SAVE10 behavior preserved
+  assert.equal(calculateDiscount(100, 'SAVE10'), 10);
+  assert.equal(calculatePayable(100, 'SAVE10'), 90);
+});
