@@ -177,3 +177,10 @@ test('Issue #39: BULK25 floating-point boundary regression (Issue #37)', () => {
   assert.equal(calculateDiscount(justAbove, 'BULK25'), expectedDiscount);
   assert.equal(calculatePayable(justAbove, 'BULK25'), Math.round((justAbove - expectedDiscount) * 100) / 100);
 });
+
+test('Issue #49: BULK25 payable exactly at 1000 threshold boundary', () => {
+  // Drill coverage gap: verify precise threshold calculation leaves payable at exactly 750.00
+  assert.equal(calculateDiscount(1000.00, 'BULK25'), 250.00);
+  assert.equal(calculatePayable(1000.00, 'BULK25'), 750.00);
+  assert.equal(calculatePayable(1000, 'BULK25'), 750);
+});
