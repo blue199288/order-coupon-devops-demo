@@ -158,6 +158,13 @@ test('Issue #42: BULK25 acceptance criteria', () => {
   assert.equal(calculatePayable(200, 'SAVE10'), 180);
 });
 
+test('Issue #42: BULK25 ignores rounding-up payable just below threshold', () => {
+  // orderAmount 999.999 < 1000, so eligibility check uses raw amount → no discount
+  assert.equal(calculateDiscount(999.999, 'BULK25'), 0);
+  // calculatePayable rounds 999.999 to 1000.00, but discount is still 0
+  assert.equal(calculatePayable(999.999, 'BULK25'), 1000.00);
+});
+
 test('Issue #39: BULK25 floating-point boundary regression (Issue #37)', () => {
   // 1000 - Number.EPSILON === 1000 in IEEE 754; use relative epsilon for actual boundary
   const justBelow = 1000 * (1 - Number.EPSILON); // 999.9999999999998, truly < 1000
