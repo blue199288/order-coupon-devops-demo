@@ -48,3 +48,9 @@ test('SAVE10 behavior is preserved', () => {
   assert.equal(calculateDiscount(100, 'SAVE10'), 10);
   assert.equal(calculatePayable(100, 'SAVE10'), 90);
 });
+
+test('Issue #12: BULK25 acceptance criteria', () => {
+  assert.equal(calculateDiscount(1, 'BULK25'), 0);
+  assert.equal(calculateDiscount(5000, 'BULK25'), 1250);
+  assert.equal(calculatePayable(5000, 'BULK25'), 3750);
+});
