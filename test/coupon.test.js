@@ -72,3 +72,19 @@ test('Issue #19: BULK25 fractional cents use round-half-up not truncation', () =
   assert.equal(calculateDiscount(1001, 'BULK25'), 250.25);
   assert.equal(calculatePayable(1001, 'BULK25'), 750.75);
 });
+
+test('Issue #24: BULK25 acceptance criteria', () => {
+  // No discount below 1000
+  assert.equal(calculateDiscount(0, 'BULK25'), 0);
+  assert.equal(calculateDiscount(999, 'BULK25'), 0);
+  assert.equal(calculatePayable(999, 'BULK25'), 999);
+  // 25% off at exactly 1000
+  assert.equal(calculateDiscount(1000, 'BULK25'), 250);
+  assert.equal(calculatePayable(1000, 'BULK25'), 750);
+  // 25% off above 1000
+  assert.equal(calculateDiscount(2000, 'BULK25'), 500);
+  assert.equal(calculatePayable(2000, 'BULK25'), 1500);
+  // Existing coupon behavior preserved
+  assert.equal(calculateDiscount(200, 'SAVE10'), 20);
+  assert.equal(calculatePayable(200, 'SAVE10'), 180);
+});
