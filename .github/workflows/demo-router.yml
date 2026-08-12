@@ -8,7 +8,7 @@ on:
         required: true
         type: string
   issues:
-    types: [opened, labeled, milestoned, reopened]
+    types: [labeled]
   pull_request:
     types: [opened, reopened, synchronize, ready_for_review, closed]
 
@@ -25,9 +25,8 @@ jobs:
       github.event.issue.milestone != null &&
       contains(github.event.issue.labels.*.name, 'flow:demo') &&
       contains(github.event.issue.labels.*.name, 'status:ready-dev') &&
-      (github.event.action == 'opened' || github.event.action == 'reopened' ||
-       (github.event.action == 'labeled' && github.event.label.name == 'status:ready-dev') ||
-       github.event.action == 'milestoned')
+      github.event.action == 'labeled' &&
+      github.event.label.name == 'status:ready-dev'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
