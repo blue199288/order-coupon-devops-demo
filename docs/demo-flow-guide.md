@@ -182,6 +182,17 @@ PAT 和 API 地址只存储在 GitHub Actions Secrets。启动器负责隐藏输
 
 ## 一键 Demo：客户实际会看到什么
 
+### 获取并运行演示程序
+
+交付包提供 Apple Silicon 的 `QoderWake-GitHub-Demo-macOS-arm64.zip`、Intel Mac 的 `QoderWake-GitHub-Demo-macOS-x64.zip` 和 `SHA256SUMS`。运行 `uname -m` 判断架构，下载后执行 `shasum -a 256 -c SHA256SUMS`；只有结果为 `OK` 才解压运行。
+
+首次运行可能被 macOS Gatekeeper 或企业终端安全软件拦截。确认文件来自正式渠道且 SHA256 校验通过后，可在“系统设置 → 隐私与安全性”中选择“仍要打开”；企业设备应把文件用途和 SHA256 提交 IT/安全管理员，只申请放行该文件。不要关闭 Gatekeeper、杀毒软件或企业安全策略。参考 [Apple 官方说明](https://support.apple.com/en-asia/guide/mac-help/-mh40616/mac)。
+
+```bash
+chmod +x ./qw-github-demo-darwin-arm64
+./qw-github-demo-darwin-arm64 launch
+```
+
 运行：
 
 ```bash
