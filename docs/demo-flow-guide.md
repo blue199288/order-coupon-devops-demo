@@ -164,19 +164,9 @@ PAT 和 API 地址只存储在 GitHub Actions Secrets。启动器负责隐藏输
 
 启动器同时读取 GitHub 状态和 QoderWake Run，实时展示当前阶段、活动角色和下一项人工操作。Waker 开始工作时可跳转到实时会话，需要 Merge 时可直接打开对应 PR。流程不是在后台“黑盒运行”。
 
-### 最佳实践八：演示流程与真实流程必须隔离
+### 最佳实践八：演示事实必须与历史运行隔离
 
-同一仓库同时支持简单 Demo 和客户 EATP 流程，但通过以下维度隔离：
-
-| 隔离维度 | Demo 流程 | Real EATP 流程 |
-|---|---|---|
-| 事实标识 | `flow:demo` | `flow:real` |
-| 角色 | Release / Developer / Reviewer / Tester | Orchestrator / Developer / Tester |
-| Secret | `QW_DEMO_*_WEBHOOK` | `QW_REAL_*_WEBHOOK` |
-| Router | `demo-router.yml` | `real-flow-router.yml` |
-| 代码识别 | `demo/*` + Review SHA marker | Batch / `phase:*` / `eatp:L*` |
-
-两套流程不共享 Waker 上下文，也不会因为同一个 Issue 或 PR 事件互相唤醒。
+每轮演示使用带随机后缀的唯一 Iteration、独立分支和 Issue/PR 关联标记。Router 只处理 `flow:demo` 事实，Reviewer 只认当前 head SHA，监控器只统计本轮开始时间后的对象，因此同一仓库可以安全、反复演示而不会串入上一轮状态。
 
 ---
 
@@ -184,7 +174,7 @@ PAT 和 API 地址只存储在 GitHub Actions Secrets。启动器负责隐藏输
 
 ### 获取并运行演示程序
 
-交付包提供 Apple Silicon 的 `QoderWake-GitHub-Demo-macOS-arm64.zip`、Intel Mac 的 `QoderWake-GitHub-Demo-macOS-x64.zip` 和 `SHA256SUMS`。运行 `uname -m` 判断架构，下载后执行 `shasum -a 256 -c SHA256SUMS`；只有结果为 `OK` 才解压运行。
+[GitHub Release v3.0.0](https://github.com/blue199288/order-coupon-devops-demo/releases/tag/qw-github-demo-v3.0.0) 提供 Apple Silicon 的 `QoderWake-GitHub-Demo-macOS-arm64.zip`、Intel Mac 的 `QoderWake-GitHub-Demo-macOS-x64.zip` 和 `SHA256SUMS`。运行 `uname -m` 判断架构，下载后执行 `shasum -a 256 -c SHA256SUMS`；只有结果为 `OK` 才解压运行。
 
 首次运行可能被 macOS Gatekeeper 或企业终端安全软件拦截。确认文件来自正式渠道且 SHA256 校验通过后，可在“系统设置 → 隐私与安全性”中选择“仍要打开”；企业设备应把文件用途和 SHA256 提交 IT/安全管理员，只申请放行该文件。不要关闭 Gatekeeper、杀毒软件或企业安全策略。参考 [Apple 官方说明](https://support.apple.com/en-asia/guide/mac-help/-mh40616/mac)。
 
@@ -241,8 +231,6 @@ Requirement → 开发 → PR → AI Review → 人工 Merge
 | GitHub Secrets | CI 凭据库或企业密钥管理服务 |
 
 Waker 的职责分工、BIBLE 约束、API 触发、幂等设计、人机门禁和可观察性可以原样复用。
-
-仓库中保留的 Real EATP 流程就是进一步扩展的示例：它增加 Batch、INIT/DEV/TEST、错误分类、L0-L3 路由和 WAIT_USER，证明同一套 QoderWake 架构可以从“易理解的研发 Demo”演进为“复杂的企业测试状态机”。
 
 ---
 

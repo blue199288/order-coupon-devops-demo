@@ -1,15 +1,16 @@
 # QoderWake × GitHub DevOps Demo
 
-本仓库由 QoderWake 一键向导维护，默认用于演示一条容易观察的 AI DevOps 闭环，同时保留真实用户 EATP 流程。
+本仓库由 QoderWake 一键向导维护，用于演示一条容易观察、可重复运行的 AI DevOps 研发闭环。
 
 推荐先阅读对外传播稿：[QoderWake × GitHub AI DevOps 最佳实践](docs/demo-flow-guide.md)。文档包含产品价值、完整研发故事、架构、工程原则和一键体验方式。
 
 ## 下载与首次运行
 
-从正式交付目录或 GitHub Release 下载与 Mac 处理器匹配的文件，并同时下载 `SHA256SUMS`：
+从 [GitHub Release v3.0.0](https://github.com/blue199288/order-coupon-devops-demo/releases/tag/qw-github-demo-v3.0.0) 下载与 Mac 处理器匹配的文件，并同时下载校验文件：
 
-- Apple Silicon（M1/M2/M3/M4）：`QoderWake-GitHub-Demo-macOS-arm64.zip`
-- Intel Mac：`QoderWake-GitHub-Demo-macOS-x64.zip`
+- Apple Silicon（M1/M2/M3/M4）：[QoderWake-GitHub-Demo-macOS-arm64.zip](https://github.com/blue199288/order-coupon-devops-demo/releases/download/qw-github-demo-v3.0.0/QoderWake-GitHub-Demo-macOS-arm64.zip)
+- Intel Mac：[QoderWake-GitHub-Demo-macOS-x64.zip](https://github.com/blue199288/order-coupon-devops-demo/releases/download/qw-github-demo-v3.0.0/QoderWake-GitHub-Demo-macOS-x64.zip)
+- 校验文件：[SHA256SUMS](https://github.com/blue199288/order-coupon-devops-demo/releases/download/qw-github-demo-v3.0.0/SHA256SUMS)
 
 使用 `uname -m` 判断架构：`arm64` 选择 Apple Silicon，`x86_64` 选择 Intel。下载后先校验：
 
@@ -43,10 +44,11 @@ Intel Mac 将文件名换成 `qw-github-demo-darwin-x64`。
 7. 测试通过后 `Publish Demo Iteration` 唤醒 Release Waker创建发布 PR。
 8. 用户合并发布 PR 后，Release Waker 打 Tag、创建 GitHub Release 并关闭 Milestone。
 
-## 两条流程如何隔离
+## 自动化边界
 
-- Demo：`flow:demo`、`demo/*`、`QW_DEMO_*_WEBHOOK`、`demo-router.yml`。
-- Real：`flow:real`、`type:batch` / `eatp:L*`、`QW_REAL_*_WEBHOOK`、`real-flow-router.yml`。
-- `ci.yml` 是唯一共享组件，只负责代码质量门禁。
+- GitHub Issue、Milestone、PR、CI 和 Release 是研发事实源。
+- `demo-router.yml` 只转发 `flow:demo` Issue 与带权威交付标记的代码 PR。
+- 四个 Waker 使用相互独立的 API 自动任务和 `QW_DEMO_*_WEBHOOK` Secret。
+- `ci.yml` 只负责代码质量门禁；代码合并与正式发布合并由用户确认。
 
 Qoder PAT 和 Waker API 地址只保存在 GitHub Actions Secrets。每次调用都在 Header 中携带 `Authorization: Bearer <PAT>`。
