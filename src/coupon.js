@@ -18,6 +18,7 @@ export function calculatePayable(orderAmount, couponCode) {
   return roundMoney(orderAmount - calculateDiscount(orderAmount, couponCode));
 }
 
+// Fractional cents use round-half-up (Math.round), not truncation.
 function roundMoney(value) {
   return Math.round(value * 100) / 100;
 }
