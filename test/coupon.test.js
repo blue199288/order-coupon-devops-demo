@@ -44,6 +44,11 @@ test('BULK25 handles fractional cents by rounding', () => {
   assert.equal(calculatePayable(1001, 'BULK25'), 750.75);
 });
 
+test('Issue #14: BULK25 rounds fractional cents instead of truncating', () => {
+  assert.equal(calculateDiscount(1003, 'BULK25'), 250.75);
+  assert.equal(calculatePayable(1003, 'BULK25'), 752.25);
+});
+
 test('SAVE10 behavior is preserved', () => {
   assert.equal(calculateDiscount(100, 'SAVE10'), 10);
   assert.equal(calculatePayable(100, 'SAVE10'), 90);
