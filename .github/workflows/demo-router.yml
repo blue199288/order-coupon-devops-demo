@@ -26,8 +26,7 @@ jobs:
       contains(github.event.issue.labels.*.name, 'flow:demo') &&
       contains(github.event.issue.labels.*.name, 'status:ready-dev') &&
       github.event.action == 'labeled' &&
-      (github.event.label.name == 'status:ready-dev' ||
-       github.event.label.name == 'flow:demo')
+      github.event.label.name == 'status:ready-dev'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -55,6 +54,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
       - name: Resolve Demo pull request
         id: pull
         env:
@@ -87,6 +88,12 @@ jobs:
           milestone_number="$(jq -r '.milestone.number // empty' <<<"$issue_json")"
           if [ -z "$milestone_number" ]; then echo "Linked Issue has no Milestone" >&2; exit 1; fi
           comments_json="$(gh api "repos/${GITHUB_REPOSITORY}/issues/${issue_number}/comments?per_page=100")"
+          if [ "$(jq 'length' <<<"$comments_json")" -eq 0 ]; then
+            parent_number="$(jq -r '(.body // "") | capture("(?m)^Parent:[[:space:]]*#(?<number>[0-9]+)[[:space:]]*$").number // empty' <<<"$issue_json")"
+            if [ -n "$parent_number" ]; then
+              comments_json="$(gh api "repos/${GITHUB_REPOSITORY}/issues/${parent_number}/comments?per_page=100")"
+            fi
+          fi
           expected_base="$(jq -r --arg marker "[QW-DEMO][RELEASE][milestone:${milestone_number}][BRANCH_READY] " '[.[].body | select(contains($marker)) | split($marker)[1] | split("\n")[0]][-1] // empty' <<<"$comments_json")"
           if [ -z "$expected_base" ] || [ "$ACTUAL_BASE" != "$expected_base" ]; then
             echo "Demo PR targets wrong iteration: actual=$ACTUAL_BASE expected=$expected_base" >&2
