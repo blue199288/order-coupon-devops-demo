@@ -204,3 +204,9 @@ test('Issue #47: BULK25 acceptance criteria', () => {
   assert.equal(calculateDiscount(200, 'SAVE10'), 20);
   assert.equal(calculatePayable(200, 'SAVE10'), 180);
 });
+
+test('Issue #54: BULK25 fractional cents just above threshold use round-half-up', () => {
+  // 1001.03 * 0.25 = 250.2575 → round-half-up → 250.26 (not truncation 250.25)
+  assert.equal(calculateDiscount(1001.03, 'BULK25'), 250.26);
+  assert.equal(calculatePayable(1001.03, 'BULK25'), 750.77);
+});
