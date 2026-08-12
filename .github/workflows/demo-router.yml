@@ -1,6 +1,12 @@
 name: Demo Flow Event Router
 
 on:
+  workflow_dispatch:
+    inputs:
+      pull_number:
+        description: Existing Demo pull request number to route after recovery
+        required: true
+        type: string
   issues:
     types: [opened, labeled, milestoned, reopened]
   pull_request:
@@ -39,14 +45,36 @@ jobs:
 
   reviewer:
     if: >-
-      github.event_name == 'pull_request' &&
-      github.event.action != 'closed' &&
-      github.event.pull_request.draft == false &&
-      startsWith(github.event.pull_request.head.ref, 'demo/') &&
-      startsWith(github.event.pull_request.base.ref, 'iteration/')
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'pull_request' &&
+       github.event.action != 'closed' &&
+       github.event.pull_request.draft == false &&
+       (startsWith(github.event.pull_request.head.ref, 'demo/') ||
+        contains(github.event.pull_request.body, '[QW-DEMO][DEV][READY]')) &&
+       startsWith(github.event.pull_request.base.ref, 'iteration/'))
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Resolve Demo pull request
+        id: pull
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT_NAME: ${{ github.event_name }}
+          EVENT_PULL_NUMBER: ${{ github.event.pull_request.number }}
+          INPUT_PULL_NUMBER: ${{ inputs.pull_number }}
+        run: |
+          pull_number="$EVENT_PULL_NUMBER"
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then pull_number="$INPUT_PULL_NUMBER"; fi
+          gh api "repos/${GITHUB_REPOSITORY}/pulls/${pull_number}" > "$RUNNER_TEMP/demo-pr.json"
+          echo "number=$(jq -r '.number' "$RUNNER_TEMP/demo-pr.json")" >> "$GITHUB_OUTPUT"
+          echo "url=$(jq -r '.html_url' "$RUNNER_TEMP/demo-pr.json")" >> "$GITHUB_OUTPUT"
+          echo "head_sha=$(jq -r '.head.sha' "$RUNNER_TEMP/demo-pr.json")" >> "$GITHUB_OUTPUT"
+          echo "head_ref=$(jq -r '.head.ref' "$RUNNER_TEMP/demo-pr.json")" >> "$GITHUB_OUTPUT"
+          echo "base_ref=$(jq -r '.base.ref' "$RUNNER_TEMP/demo-pr.json")" >> "$GITHUB_OUTPUT"
+          if [ "$(jq -r '.draft' "$RUNNER_TEMP/demo-pr.json")" = "true" ] || ! jq -e '.base.ref | startswith("iteration/")' "$RUNNER_TEMP/demo-pr.json" >/dev/null || ! jq -e '(.head.ref | startswith("demo/")) or (.body // "" | contains("[QW-DEMO][DEV][READY]"))' "$RUNNER_TEMP/demo-pr.json" >/dev/null; then
+            echo "The selected pull request is not a ready Demo delivery" >&2
+            exit 1
+          fi
       - name: Wake Demo Reviewer Waker
         env:
           QW_API_URL: ${{ secrets.QW_DEMO_REVIEWER_WEBHOOK }}
@@ -54,9 +82,9 @@ jobs:
           QW_FLOW: demo
           QW_ROLE: reviewer
           QW_EVENT_TYPE: pull-request.content-revision
-          QW_SESSION_ENTITY: pr:${{ github.event.pull_request.number }}:sha:${{ github.event.pull_request.head.sha }}
+          QW_SESSION_ENTITY: pr:${{ steps.pull.outputs.number }}:sha:${{ steps.pull.outputs.head_sha }}
           QW_CONTEXT_JSON: >-
-            {"pullNumber":${{ github.event.pull_request.number }},"pullUrl":${{ toJSON(github.event.pull_request.html_url) }},"action":${{ toJSON(github.event.action) }},"headSha":${{ toJSON(github.event.pull_request.head.sha) }},"headRef":${{ toJSON(github.event.pull_request.head.ref) }},"baseRef":${{ toJSON(github.event.pull_request.base.ref) }}}
+            {"pullNumber":${{ steps.pull.outputs.number }},"pullUrl":${{ toJSON(steps.pull.outputs.url) }},"action":${{ toJSON(github.event.action || 'recovery') }},"headSha":${{ toJSON(steps.pull.outputs.head_sha) }},"headRef":${{ toJSON(steps.pull.outputs.head_ref) }},"baseRef":${{ toJSON(steps.pull.outputs.base_ref) }}}
         run: node .github/scripts/invoke-waker.mjs
 
   tester:
@@ -64,7 +92,8 @@ jobs:
       github.event_name == 'pull_request' &&
       github.event.action == 'closed' &&
       github.event.pull_request.merged == true &&
-      startsWith(github.event.pull_request.head.ref, 'demo/') &&
+      (startsWith(github.event.pull_request.head.ref, 'demo/') ||
+       contains(github.event.pull_request.body, '[QW-DEMO][DEV][READY]')) &&
       startsWith(github.event.pull_request.base.ref, 'iteration/')
     runs-on: ubuntu-latest
     steps:
