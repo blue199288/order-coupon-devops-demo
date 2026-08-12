@@ -184,3 +184,23 @@ test('Issue #49: BULK25 payable exactly at 1000 threshold boundary', () => {
   assert.equal(calculatePayable(1000.00, 'BULK25'), 750.00);
   assert.equal(calculatePayable(1000, 'BULK25'), 750);
 });
+
+test('Issue #47: BULK25 acceptance criteria', () => {
+  // BULK25 gives no discount below 1000
+  assert.equal(calculateDiscount(0, 'BULK25'), 0);
+  assert.equal(calculateDiscount(500, 'BULK25'), 0);
+  assert.equal(calculateDiscount(999, 'BULK25'), 0);
+  assert.equal(calculateDiscount(999.99, 'BULK25'), 0);
+  assert.equal(calculatePayable(999, 'BULK25'), 999);
+  assert.equal(calculatePayable(500, 'BULK25'), 500);
+  // BULK25 gives 25% off at and above 1000
+  assert.equal(calculateDiscount(1000, 'BULK25'), 250);
+  assert.equal(calculatePayable(1000, 'BULK25'), 750);
+  assert.equal(calculateDiscount(2000, 'BULK25'), 500);
+  assert.equal(calculatePayable(2000, 'BULK25'), 1500);
+  assert.equal(calculateDiscount(5000, 'BULK25'), 1250);
+  assert.equal(calculatePayable(5000, 'BULK25'), 3750);
+  // Existing coupon behavior preserved
+  assert.equal(calculateDiscount(200, 'SAVE10'), 20);
+  assert.equal(calculatePayable(200, 'SAVE10'), 180);
+});
