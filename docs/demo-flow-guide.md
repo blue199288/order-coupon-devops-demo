@@ -286,7 +286,7 @@ QoderWake 不是替换研发团队，也不是替换 DevOps 平台。它把团�
 一键启动器源码包统一从 [QoderWake × GitHub Demo v3.1.2](https://github.com/blue199288/order-coupon-devops-demo/releases/tag/qw-github-demo-v3.1.2) 下载：
 
 - [Windows 源码包](https://github.com/blue199288/order-coupon-devops-demo/releases/download/qw-github-demo-v3.1.2/QoderWake-GitHub-Demo-3.1.2-Windows-Source.zip)
-- [macOS / Linux 源码包](https://github.com/blue199288/order-coupon-devops-demo/releases/download/qw-github-demo-v3.1.2/QoderWake-GitHub-Demo-3.1.2-macOS-Linux-Source.tar.gz)
+- [macOS / Linux 源码包](https://github.com/blue199288/order-coupon-devops-demo/releases/download/qw-github-demo-v3.1.2/QoderWake-GitHub-Demo-3.1.2-macOS-Linux-Source.zip)
 - [源码包 SHA256](https://github.com/blue199288/order-coupon-devops-demo/releases/download/qw-github-demo-v3.1.2/SHA256SUMS-3.1.2-Source.txt)
 
 当前不再提供二进制安装包。macOS、Windows 与 Linux 均直接运行源码，不需要编译，也不需要执行 `npm install`。macOS/Linux 解压源码包后运行 `./start-demo`；Windows 解压后运行 `start-demo.cmd`。运行前请安装 Node.js 20+、Git、GitHub CLI 和 Global QoderWake。首次运行会引导完成 GitHub 登录、Qoder PAT 隐藏输入、仓库选择以及四个 Waker 的创建与 API 触发配置。PAT 不包含在仓库或下载包中。

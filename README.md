@@ -33,6 +33,6 @@ Qoder PAT 和 Waker API 地址只保存在 GitHub Actions Secrets。每次调用
 后续演示统一基于本开源仓库进行。启动器源码包请从 [QoderWake × GitHub Demo v3.1.2](https://github.com/blue199288/order-coupon-devops-demo/releases/tag/qw-github-demo-v3.1.2) 下载：
 
 - [Windows 源码包](https://github.com/blue199288/order-coupon-devops-demo/releases/download/qw-github-demo-v3.1.2/QoderWake-GitHub-Demo-3.1.2-Windows-Source.zip)
-- [macOS / Linux 源码包](https://github.com/blue199288/order-coupon-devops-demo/releases/download/qw-github-demo-v3.1.2/QoderWake-GitHub-Demo-3.1.2-macOS-Linux-Source.tar.gz)
+- [macOS / Linux 源码包](https://github.com/blue199288/order-coupon-devops-demo/releases/download/qw-github-demo-v3.1.2/QoderWake-GitHub-Demo-3.1.2-macOS-Linux-Source.zip)
 
 当前不再提供二进制安装包。macOS、Windows 与 Linux 均直接运行源码，不需要编译，也不需要执行 `npm install`。macOS/Linux 解压源码包后运行 `./start-demo`；Windows 解压后运行 `start-demo.cmd`。运行前请安装 Node.js 20+、Git、GitHub CLI 和 Global QoderWake。PAT 会在首次运行时隐藏输入，不包含在仓库或下载包中。
