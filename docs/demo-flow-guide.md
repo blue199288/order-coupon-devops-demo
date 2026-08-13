@@ -283,13 +283,10 @@ QoderWake 不是替换研发团队，也不是替换 DevOps 平台。它把团�
 
 后续演示统一基于开源仓库 [blue199288/order-coupon-devops-demo](https://github.com/blue199288/order-coupon-devops-demo) 进行。仓库包含业务示例、GitHub Actions、事件路由、CI、Waker 约束示例和配套文档，可用于现场演示，也可作为企业接入自身 DevOps 系统时的参考实现。
 
-一键启动器与源码包统一从 [QoderWake × GitHub Demo v3.1.2](https://github.com/blue199288/order-coupon-devops-demo/releases/tag/qw-github-demo-v3.1.2) 下载：
+一键启动器源码包统一从 [QoderWake × GitHub Demo v3.1.2](https://github.com/blue199288/order-coupon-devops-demo/releases/tag/qw-github-demo-v3.1.2) 下载：
 
 - [Windows 源码包](https://github.com/blue199288/order-coupon-devops-demo/releases/download/qw-github-demo-v3.1.2/QoderWake-GitHub-Demo-3.1.2-Windows-Source.zip)
 - [Linux 源码包](https://github.com/blue199288/order-coupon-devops-demo/releases/download/qw-github-demo-v3.1.2/QoderWake-GitHub-Demo-3.1.2-Linux-Source.tar.gz)
-- [macOS Apple Silicon](https://github.com/blue199288/order-coupon-devops-demo/releases/download/qw-github-demo-v3.1.2/QoderWake-GitHub-Demo-3.1.2-macOS-Apple-Silicon.zip)
-- [macOS Intel](https://github.com/blue199288/order-coupon-devops-demo/releases/download/qw-github-demo-v3.1.2/QoderWake-GitHub-Demo-3.1.2-macOS-Intel.zip)
 - [Windows / Linux 源码包 SHA256](https://github.com/blue199288/order-coupon-devops-demo/releases/download/qw-github-demo-v3.1.2/SHA256SUMS-3.1.2-Source.txt)
-- [macOS 安装包 SHA256](https://github.com/blue199288/order-coupon-devops-demo/releases/download/qw-github-demo-v3.1.2/SHA256SUMS-3.1.2.txt)
 
-运行前请安装 Node.js 20+、Git、GitHub CLI 和 Global QoderWake。首次运行会引导完成 GitHub 登录、Qoder PAT 隐藏输入、仓库选择以及四个 Waker 的创建与 API 触发配置。PAT 不包含在仓库或下载包中。
+当前不再提供二进制安装包。macOS、Windows 与 Linux 均直接运行源码，不需要编译，也不需要执行 `npm install`；macOS/Linux 也可以直接克隆本仓库后运行 `./start-demo`。运行前请安装 Node.js 20+、Git、GitHub CLI 和 Global QoderWake。首次运行会引导完成 GitHub 登录、Qoder PAT 隐藏输入、仓库选择以及四个 Waker 的创建与 API 触发配置。PAT 不包含在仓库或下载包中。
