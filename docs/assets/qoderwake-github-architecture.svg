@@ -35,6 +35,7 @@
   <path d="M800 480V525H270V560" fill="none" stroke="#6C6285" stroke-width="4" marker-end="url(#a2)"/><path d="M800 480V525H625V560" fill="none" stroke="#6C6285" stroke-width="4" marker-end="url(#a2)"/><path d="M800 480V560" stroke="#6C6285" stroke-width="4" marker-end="url(#a2)"/><path d="M800 480V525H1335V560" fill="none" stroke="#6C6285" stroke-width="4" marker-end="url(#a2)"/>
 
   <rect x="120" y="750" width="1365" height="58" rx="20" fill="#252035"/>
-  <text x="802" y="786" text-anchor="middle" font-family="Arial,'PingFang SC',sans-serif" font-size="19" fill="#FFFFFF">可观察性：启动器实时进度 · Waker 会话直达 · PR / Issue / CI / Release 证据回写</text>
+  <text x="802" y="786" text-anchor="middle" font-family="Arial,'PingFang SC',sans-serif" font-size="19" fill="#FFFFFF">事实闭环：代码 · PR · Review · Bug · 测试证据 · Release 统一回写 GitHub</text>
   <path d="M270 700V735M625 700V735M980 700V735M1335 700V735" stroke="#6C6285" stroke-width="3"/>
+  <path d="M120 779H48V255H105" fill="none" stroke="#6C6285" stroke-width="4" marker-end="url(#a2)"/>
 </svg>

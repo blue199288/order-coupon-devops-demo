@@ -72,6 +72,8 @@ Reviewer 只监听 PR 创建和源分支产生新提交两类内容事件。评�
 
 ![QoderWake 与 GitHub 自动化研发架构](assets/qoderwake-github-architecture.svg)
 
+这张图描述的是方案本身的核心闭环：GitHub 保存事实并产生事件，Actions 完成事件过滤与安全转发，QoderWake API 自动任务唤醒职责独立的 Waker，Waker 再把代码、Review、Bug、测试证据和 Release 回写 GitHub。启动器的实时进度与会话直达只属于 Demo 的体验层，不是方案运行的必要组件。
+
 ### GitHub：唯一研发事实源
 
 Milestone 表示迭代，Issue 表示 Requirement 或 Bug，PR 表示代码与发布变更，CI 表示独立质量证据。Waker 每次被唤醒都重新读取这些事实，不沿用上一次会话中的旧结论。
@@ -129,9 +131,9 @@ Waker 可以自动完成分析、编码、测试和材料准备，但代码合�
 
 PAT 和 API 地址只存储在 GitHub Actions Secrets。启动器负责隐藏输入和加密写入，不读取已有值；Workflow 只在运行时注入；错误日志不会输出响应正文或凭据。
 
-### 最佳实践七：从第一天开始考虑可观察性
+### 最佳实践七：用事实回写保证过程可审计
 
-启动器同时读取 GitHub 状态和 QoderWake Run，实时展示当前阶段、活动角色和下一项人工操作。Waker 开始工作时可跳转到实时会话，需要 Merge 时可直接打开对应 PR。流程不是在后台“黑盒运行”。
+Waker 的有效产出必须回写 GitHub：代码进入分支和 PR，评审结论关联 head SHA，缺陷包含复现证据，测试和发布都有独立记录。团队不依赖某一次 AI 对话判断流程是否完成。Demo 启动器只是把这些事实聚合成更直观的实时进度，并非方案依赖。
 
 ### 最佳实践八：演示事实必须与历史运行隔离
 
@@ -216,7 +218,7 @@ Developer 创建代码 PR 后，Reviewer Waker 自动审查当前 revision。只
 | `gh` CLI | 平台官方 CLI / OpenAPI |
 | GitHub Secrets | CI 凭据库或企业密钥管理服务 |
 
-Waker 的职责分工、BIBLE 约束、API 触发、幂等设计、人机门禁和可观察性可以原样复用。
+Waker 的职责分工、BIBLE 约束、API 触发、幂等设计、人机门禁和事实回写机制可以原样复用。
 
 ---
 
