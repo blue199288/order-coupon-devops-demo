@@ -174,6 +174,34 @@ Requirement → 开发 → PR → AI Review → 人工 Merge
 
 用户操作后无需回到终端点击“继续”，监控会通过新的 GitHub 事件自动进入下一阶段。中断后运行 `npm run watch` 即可恢复。
 
+### Demo 运行实况
+
+下面的图片截取自一轮真实的完整演示。启动器会把 GitHub 状态与 QoderWake Run 汇总成统一进度，让用户同时看到当前阶段、活动角色、实时会话和下一项人工操作。
+
+#### 1. Developer Waker 接收需求并开始开发
+
+Release Waker 创建迭代分支后，Requirement 自动进入开发链路。终端显示当前为 `3/9 Developer 正在实现需求`，并提供 Developer Waker 实时会话链接。
+
+![Developer Waker 接收需求并开始开发](screenshots/demo-run/01-developer-running.jpg)
+
+#### 2. Reviewer 与 CI 通过，等待用户合并
+
+Developer 创建代码 PR 后，Reviewer Waker 自动审查当前 revision。只有 Reviewer PASS 且 CI 为绿色时，启动器才进入人工门禁并给出目标 PR 链接；Waker 不会代替用户合并代码。
+
+![Reviewer 与 CI 通过后提示用户合并代码](screenshots/demo-run/02-review-and-merge-gate.jpg)
+
+#### 3. Tester 发现 Bug，自动回流 Developer
+
+代码合入迭代分支后，Tester Waker 独立验收。首次测试发现问题时，它创建带复现证据的 Bug，并自动唤醒 Developer 修复；随后再次进入 Reviewer、人工 Merge 和复测链路。
+
+![Tester 创建 Bug 并自动回流 Developer](screenshots/demo-run/03-bug-feedback-loop.jpg)
+
+#### 4. 发布完成，迭代自动收尾
+
+复测通过后，Release Waker 创建发布 PR。用户确认合并后，Release Waker 创建 Tag 与 GitHub Release、关闭 Iteration，启动器最终显示 `9/9` 和本轮完成状态。
+
+![Tag、GitHub Release 与迭代关闭完成](screenshots/demo-run/04-release-complete.jpg)
+
 ---
 
 ## 不止是 Demo：如何迁移到真实研发体系
