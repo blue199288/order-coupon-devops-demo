@@ -192,6 +192,24 @@ Developer 创建代码 PR 后，Reviewer Waker 自动审查当前 revision。只
 
 ![Reviewer 与 CI 通过后提示用户合并代码](screenshots/demo-run/02-review-and-merge-gate.jpg)
 
+这一步不只在启动器里显示一个进度数字。用户可以沿着会话链接进入 QoderWake，查看 Reviewer 如何读取 PR、关联 Requirement、核对目标分支与 head SHA、执行测试，并将最终 PASS 结论回写 GitHub。
+
+![QoderWake Reviewer Waker 完成独立评审并输出 PASS](screenshots/demo-run/05-qoderwake-reviewer-pass.jpg)
+
+GitHub PR 是这次交付的事实页面。以真实演示中的 [PR #58](https://github.com/blue199288/order-coupon-devops-demo/pull/58) 为例，页面同时保留关联 Issue、源分支与迭代分支、变更说明、验收标准和本地测试证据；最终 Merge 仍由用户确认。
+
+![GitHub PR 展示需求关联、分支和测试证据](screenshots/demo-run/06-github-pr-overview.jpg)
+
+Reviewer 的结论不会只停留在 Waker 对话中，而是以带 revision 标识的 Review Summary 回写 PR，记录测试、Lint、CI、验收标准和 Diff 范围，形成可审计的评审证据。
+
+![QoderWake Reviewer 将 AI Review 结论回写 GitHub PR](screenshots/demo-run/07-github-pr-ai-review.jpg)
+
+GitHub Actions 同时提供独立 CI 门禁。只有测试 Job 成功，Reviewer PASS 才能与绿色 CI 一起满足启动器的合并条件。
+
+![GitHub Actions CI 测试 Job 成功](screenshots/demo-run/08-github-actions-ci.jpg)
+
+> 截图中的 PR、Issue、revision 和运行记录来自同一轮真实演示，仅用于说明各系统中的证据如何衔接；每次重新启动 Demo 都会生成新的唯一 Iteration 与编号。
+
 #### 3. Tester 发现 Bug，自动回流 Developer
 
 代码合入迭代分支后，Tester Waker 独立验收。首次测试发现问题时，它创建带复现证据的 Bug，并自动唤醒 Developer 修复；随后再次进入 Reviewer、人工 Merge 和复测链路。
