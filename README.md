@@ -1,8 +1,12 @@
 # QoderWake × GitHub DevOps Demo
 
-本仓库由 QoderWake 一键向导维护，用于演示一条容易观察、可重复运行的 AI DevOps 研发闭环。
+本仓库用于演示一条容易观察、可重复运行的 AI DevOps 研发闭环。
 
-推荐先阅读对外传播稿：[QoderWake × GitHub AI DevOps 最佳实践](docs/demo-flow-guide.md)。文档包含产品价值、完整研发故事、架构、工程原则和一键体验方式。
+下面通过一个 Demo 给大家演示，如何借助 QoderWake + GitHub 完成一次从需求创建、代码开发、评审测试到版本发布的完整交付。
+
+![QoderWake 与 GitHub 完整研发交付流程](docs/assets/demo-delivery-flow.svg)
+
+推荐先阅读：[QoderWake × GitHub AI DevOps 最佳实践](docs/demo-flow-guide.md)。文档包含完整研发流程、SVG 方案架构图、角色分工、工程原则和一键体验方式。
 
 ## 推荐演示链路
 
@@ -23,3 +27,14 @@
 - `ci.yml` 只负责代码质量门禁；代码合并与正式发布合并由用户确认。
 
 Qoder PAT 和 Waker API 地址只保存在 GitHub Actions Secrets。每次调用都在 Header 中携带 `Authorization: Bearer <PAT>`。
+
+## Demo 下载
+
+后续演示统一基于本开源仓库进行。启动器和各平台交付包请从 [QoderWake × GitHub Demo v3.1.2](https://github.com/blue199288/order-coupon-devops-demo/releases/tag/qw-github-demo-v3.1.2) 下载：
+
+- [Windows 源码包](https://github.com/blue199288/order-coupon-devops-demo/releases/download/qw-github-demo-v3.1.2/QoderWake-GitHub-Demo-3.1.2-Windows-Source.zip)
+- [Linux 源码包](https://github.com/blue199288/order-coupon-devops-demo/releases/download/qw-github-demo-v3.1.2/QoderWake-GitHub-Demo-3.1.2-Linux-Source.tar.gz)
+- [macOS Apple Silicon](https://github.com/blue199288/order-coupon-devops-demo/releases/download/qw-github-demo-v3.1.2/QoderWake-GitHub-Demo-3.1.2-macOS-Apple-Silicon.zip)
+- [macOS Intel](https://github.com/blue199288/order-coupon-devops-demo/releases/download/qw-github-demo-v3.1.2/QoderWake-GitHub-Demo-3.1.2-macOS-Intel.zip)
+
+Windows 与 Linux 使用源码包即可，不需要编译，也不需要执行 `npm install`。运行前请安装 Node.js 20+、Git、GitHub CLI 和 Global QoderWake。PAT 会在首次运行时隐藏输入，不包含在仓库或下载包中。

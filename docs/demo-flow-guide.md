@@ -36,22 +36,11 @@ QoderWake 的价值不只是“再增加一个 AI 入口”，而是让 AI 成�
 
 ## 一条需求，四位 Waker，一次完整交付
 
-Demo 选择了客户最容易理解的一条研发主线，并刻意保留了两个人工 Merge 门禁。
+下面通过一个 Demo 给大家演示，如何借助 QoderWake + GitHub 完成一次从需求创建、代码开发、评审测试到版本发布的完整交付。
 
-```mermaid
-flowchart LR
-  A["创建迭代与需求"] --> B["Release Waker<br/>创建 iteration 分支"]
-  B --> C["Developer Waker<br/>开发、自测、提交 PR"]
-  C --> D{"Reviewer Waker<br/>审查当前 revision"}
-  D -->|"CHANGES_REQUESTED"| C
-  D -->|"PASS + CI"| E["用户合并代码 PR"]
-  E --> F{"Tester Waker<br/>独立验收"}
-  F -->|"发现 Bug"| G["创建带证据的 Bug"]
-  G --> C
-  F -->|"通过"| H["Release Waker<br/>创建发布 PR"]
-  H --> I["用户合并发布 PR"]
-  I --> J["Tag + GitHub Release<br/>关闭迭代"]
-```
+Demo 选择了最容易理解的一条研发主线，由 Release、Developer、Reviewer 和 Tester 四位 Waker 自动接力，并保留代码 PR 与发布 PR 两个人工 Merge 门禁，让自动化效率与研发治理同时成立。
+
+![QoderWake 与 GitHub 完整研发交付流程](assets/demo-delivery-flow.svg)
 
 ### Release Waker：让迭代有清晰的交付边界
 
@@ -81,27 +70,7 @@ Reviewer 只监听 PR 创建和源分支产生新提交两类内容事件。评�
 
 ## 方案架构：让 DevOps 系统做控制面，让 Waker 做执行面
 
-```mermaid
-flowchart TB
-  USER["用户 / 一键启动器"] -->|"创建演示"| START["GitHub workflow_dispatch"]
-  START --> FACTS["Milestone / Issue / PR"]
-  FACTS --> EVENT["GitHub 研发事件"]
-  EVENT --> ROUTER["GitHub Actions Event Router"]
-  ROUTER -->|"读取 GitHub Secrets"| BRIDGE["统一 Waker Invocation"]
-  BRIDGE -->|"POST + Authorization: Bearer PAT"| API["QoderWake API 自动任务"]
-  API --> RELEASE["Release Waker"]
-  API --> DEV["Developer Waker"]
-  API --> REVIEW["Reviewer Waker"]
-  API --> TEST["Tester Waker"]
-  RELEASE -->|"gh / git"| FACTS
-  DEV -->|"gh / git / npm"| FACTS
-  REVIEW -->|"gh / npm"| FACTS
-  TEST -->|"gh / npm"| FACTS
-  FACTS --> CI["GitHub CI<br/>test + lint"]
-  MONITOR["实时进度监控"] --> FACTS
-  MONITOR --> API
-  MONITOR -->|"会话 / PR 直达链接"| USER
-```
+![QoderWake 与 GitHub 自动化研发架构](assets/qoderwake-github-architecture.svg)
 
 ### GitHub：唯一研发事实源
 
@@ -277,3 +246,20 @@ QoderWake 不是替换研发团队，也不是替换 DevOps 平台。它把团�
 当需求、代码、测试和发布事件都能自动找到最合适的 Waker，研发人员就不再需要把时间花在催办、搬运上下文和重复检查上，而可以把注意力放回产品判断、技术决策和风险控制。
 
 **这就是 QoderWake 作为 AI DevOps 执行层的最佳实践：让流程自己流动，让结果始终可见，让关键决策仍然掌握在人手中。**
+
+---
+
+## Demo 下载与开源仓库
+
+后续演示统一基于开源仓库 [blue199288/order-coupon-devops-demo](https://github.com/blue199288/order-coupon-devops-demo) 进行。仓库包含业务示例、GitHub Actions、事件路由、CI、Waker 约束示例和配套文档，可用于现场演示，也可作为企业接入自身 DevOps 系统时的参考实现。
+
+一键启动器与源码包统一从 [QoderWake × GitHub Demo v3.1.2](https://github.com/blue199288/order-coupon-devops-demo/releases/tag/qw-github-demo-v3.1.2) 下载：
+
+- [Windows 源码包](https://github.com/blue199288/order-coupon-devops-demo/releases/download/qw-github-demo-v3.1.2/QoderWake-GitHub-Demo-3.1.2-Windows-Source.zip)
+- [Linux 源码包](https://github.com/blue199288/order-coupon-devops-demo/releases/download/qw-github-demo-v3.1.2/QoderWake-GitHub-Demo-3.1.2-Linux-Source.tar.gz)
+- [macOS Apple Silicon](https://github.com/blue199288/order-coupon-devops-demo/releases/download/qw-github-demo-v3.1.2/QoderWake-GitHub-Demo-3.1.2-macOS-Apple-Silicon.zip)
+- [macOS Intel](https://github.com/blue199288/order-coupon-devops-demo/releases/download/qw-github-demo-v3.1.2/QoderWake-GitHub-Demo-3.1.2-macOS-Intel.zip)
+- [Windows / Linux 源码包 SHA256](https://github.com/blue199288/order-coupon-devops-demo/releases/download/qw-github-demo-v3.1.2/SHA256SUMS-3.1.2-Source.txt)
+- [macOS 安装包 SHA256](https://github.com/blue199288/order-coupon-devops-demo/releases/download/qw-github-demo-v3.1.2/SHA256SUMS-3.1.2.txt)
+
+运行前请安装 Node.js 20+、Git、GitHub CLI 和 Global QoderWake。首次运行会引导完成 GitHub 登录、Qoder PAT 隐藏输入、仓库选择以及四个 Waker 的创建与 API 触发配置。PAT 不包含在仓库或下载包中。
